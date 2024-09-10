@@ -3,32 +3,38 @@ pragma solidity ^0.8.24;
 
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
+contract DocumentVerification {
+struct Document {
+    string hash; // Ipfs hash
+   
+    address uploader;
+    uint256 timestamp;
+}
 
-contract Lock {
-    uint public unlockTime;
-    address payable public owner;
+mapping(string => Document) public documents;
+//Event to emit when a documen is uploaded
 
-    event Withdrawal(uint amount, uint when);
+event DocumentUploaded(string hash, address uploader, uint256 timestamp);
 
-    constructor(uint _unlockTime) payable {
-        require(
-            block.timestamp < _unlockTime,
-            "Unlock time should be in the future"
-        );
+//function to upload document hash
+function uploadDocument(string memory hash) public {
+    require(bytes(hash).length > 0, "Hash cannot be empty");
+    require(documents[hash].uploader == address(0), "Document already exists");
 
-        unlockTime = _unlockTime;
-        owner = payable(msg.sender);
+    documents[hash] = Document(hash, msg.sender, block.timestamp);
+    emit DocumentUploaded(hash, msg.sender, block.timestamp);
+}
+
+//function to  verifiy if a document exists
+function verifyDocument(string memory hash) public view returns (bool,address,uint256) {
+    if(documents[hash].uploader != address(0)){
+        Document memory doc = documents[hash];
+        return (true,doc.uploader,doc.timestamp);
+    } else{
+        return (false,address(0),0);
     }
+}
 
-    function withdraw() public {
-        // Uncomment this line, and the import of "hardhat/console.sol", to print a log in your terminal
-        // console.log("Unlock time is %o and block timestamp is %o", unlockTime, block.timestamp);
 
-        require(block.timestamp >= unlockTime, "You can't withdraw yet");
-        require(msg.sender == owner, "You aren't the owner");
 
-        emit Withdrawal(address(this).balance, block.timestamp);
-
-        owner.transfer(address(this).balance);
-    }
 }
