@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@thirdweb-dev/react": "^4.9.4",
+    "@thirdweb-dev/sdk": "^4.0.99",
+    "ethers": "^6.13.2",
     "next": "14.2.8",
     "react": "^18",
     "react-dom": "^18"
